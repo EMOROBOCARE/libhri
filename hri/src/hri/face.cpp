@@ -27,6 +27,7 @@
 #include "magic_enum.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/image.hpp"
+#include "std_msgs/msg/string.hpp"
 
 #include "hri/feature_tracker.hpp"
 #include "hri/types.hpp"
@@ -84,6 +85,15 @@ Face::Face(
     kNs_ + "/expression",
     default_qos,
     bind(&Face::onExpression, this, std::placeholders::_1),
+    options);
+
+  // Add subscription for the head_gesture topic
+  head_gesture_subscriber_ = rclcpp::create_subscription<std_msgs::msg::String>(
+    node_interfaces_.get_node_parameters_interface(),
+    node_interfaces_.get_node_topics_interface(),
+    kNs_ + "/head_gesture",
+    default_qos,
+    bind(&Face::onHeadGesture, this, std::placeholders::_1),
     options);
 }
 
@@ -160,6 +170,12 @@ void Face::onExpression(const hri_msgs::msg::Expression::ConstSharedPtr msg)
   expression_confidence_ = msg->confidence;
 }
 
+// Method to handle the head_gesture topic
+void Face::onHeadGesture(const std_msgs::msg::String::ConstSharedPtr msg)
+{
+  head_gesture_ = msg->data;
+}
+
 std::optional<geometry_msgs::msg::TransformStamped> Face::gazeTransform() const
 {
   return transformFromReference(gazeFrame());
@@ -174,6 +190,7 @@ void Face::invalidate()
   softbiometrics_subscriber_.reset();
   facial_action_units_subscriber_.reset();
   expression_subscriber_.reset();
+  head_gesture_subscriber_.reset();
   roi_.reset();
   cropped_.reset();
   aligned_.reset();
@@ -182,6 +199,7 @@ void Face::invalidate()
   gender_.reset();
   facial_action_units_.reset();
   expression_.reset();
+  head_gesture_.reset();
   expression_va_.reset();
   expression_confidence_.reset();
   FeatureTracker::invalidate();

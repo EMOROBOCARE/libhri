@@ -437,6 +437,7 @@ PYBIND11_MODULE(hri, m) {
     - :py:attr:`expression` -- person's expression as discrete state (Expression)
     - :py:attr:`expression_va` -- person's expression in circumplex model space (Tuple (valence, arousal))
     - :py:attr:`expression_confidence` -- person's expression confidence (float)
+    - :py:attr:`head_gesture` -- head gesture detected (eg, 'Yes', 'No') (str)
     - :py:attr:`gaze_transform` -- gaze's stamped 3D transform (geometry_msgs.msg.TransformStamped)
     )";
   face.def_property_readonly(
@@ -473,6 +474,9 @@ PYBIND11_MODULE(hri, m) {
   face.def_property_readonly(
     "expression_confidence", &hri::Face::expressionConfidence,
     "Person's expression confidence");
+  face.def_property_readonly(
+    "head_gesture", &hri::Face::headGesture,
+    "Head gesture detected (eg, 'Yes', 'No') (str)");
   py::class_<hri::Voice, std::shared_ptr<hri::Voice>> voice(m, "Voice",
     feature_tracker);
   voice.doc() =
